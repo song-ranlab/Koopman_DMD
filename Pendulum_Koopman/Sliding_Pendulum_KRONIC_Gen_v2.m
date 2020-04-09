@@ -153,3 +153,10 @@ DataStore.tspan1 = tspan;
 
 %% SAVE RESULTS
 save([path2data,'/',[ModelName1,'Data.mat']])
+%% DMD Time
+[Mode,ceval,deval,magmode,Xdmd] = DMD (y1(:,1:end-1),y1(:,2:end),4,dt);        %trying the first 2 nodes 
+
+for i = length(Mode)
+    yk(i) = Mode(i,:) * deval;
+end
+

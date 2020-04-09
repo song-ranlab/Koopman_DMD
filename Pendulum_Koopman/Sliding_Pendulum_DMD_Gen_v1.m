@@ -95,7 +95,7 @@ f = @(t,x,u) ([x(2);
            (1/(m*L*L*(M+m*(1-cos(x(3))^2))))*((m+M)*m*g*L*sin(x(3)) - m*L*cos(x(3))*(m*L*x(4)^2*sin(x(3)) - d*x(2))) - 0*m*L*cos(x(3))*(1/(m*L*L*(M+m*(1-cos(x(3))^2))))*u]+B*u);
                
 ode_options = odeset('RelTol',1e-10, 'AbsTol',1e-11);
-% [t,y0] = ode45(@(t,x)f(t,x,0),tspan,x0,ode_options);
+ [t,y0] = ode45(@(t,x)f(t,x,0),tspan,x0,ode_options);
 % [Hvals0,Jvals0] = evalCostFun_Hamiltonian(H,y0,zeros(1,size(y0,1)),Q,R,H_ref);
 
 
@@ -183,65 +183,5 @@ save([path2data,'/',[ModelName1,'Data.mat']])
 
 %% Kronic Gen for Unforced
 
-y = y4;
-usesine = 0;    %not cetain what this is for
-polyorder = 4;
-nvar = 4;       %nvar is for variation in n rank was 2 in original code
-
-Hy = zeros(length(y),1);
-dy = zeros(size(y));
-for k=1:length(y)
-    dy(k,:) = f(0,y(k,:),0)';
-    Hy(k) = H(y(k,:));
-end
-figure; hold on, box on
-plot(t,y(:,1),'-','Color',[0,0,0.7],'LineWidth',2)
-plot(t,y(:,2),'-','Color',[0,0.7,0],'LineWidth',2)
-plot(t,y(:,3),'-','Color',[0,0,1,.5],'LineWidth',2)
-plot(t,y(:,4),'-','Color',[0,0.5,1],'LineWidth',2)
-legend('x1','x2','x3','x4')
-xlabel('t'), ylabel('xi')
-set(gca,'xtick',[0:2:10])
-set(gca,'FontSize',16)
-% set(gcf,'Position',[100 100 225 200])
-set(gcf,'PaperPositionMode','auto')
-title('State Plot')
-% print('-depsc2', '-loose', [path2figs,ModelName_tmp,'Hamiltonian_Trajectory','.eps']);
-
-%% Determining Eigenvalues and Eigenfunctions for KRONIC
-% Construct libraries  - I want to change this to a foier based one since
-% polynomial order library is not realistic due to its interaction with
-% trigonometric functions as seen in the Hamiltonian
-Theta = buildTheta(y,nvar,polyorder,usesine);
-Gamma = buildGamma(y,dy,nvar,polyorder,usesine);
-
-% Compute SVD   -I am not sure wh theta is canceled out, wouldnt this
-% difference be required
-[U,S,V] = svd(1*Theta - Gamma,'econ');
-
-% Least-squares Koopman
-K = pinv(Theta)*Gamma;    %pinv is Mooroe-Penros Puedoiners
-K(abs(K)<1e-12) = 0;
-[T,D] = eig(K);
-D = diag(D);
-[~,IX] = sort(abs(D),'ascend');
-
-% Compute eigenfunction
-xi0 = V(:,end);             % from SVD
-xi0(abs(xi0)<1e-12) = 0; %if sufficiently small value is 0
-
-D(IX(1))
-xi1 = T(:,IX(1));%+Tls(:,IX(2));  % from least-squares fit
-xi1(abs(xi1)<1e-12) = 0; 
-
-% % Print coefficients % lets ignore tis for now, not entirely certain what
-% % this does
-% poolDataLIST({'x','y'},xi0,nvar,polyorder,usesine);
-% poolDataLIST({'x','y'},xi1,nvar,polyorder,usesine);
-
-% Plot evolution of eigenfunction = Hamiltonian
-if length(Hy)~=length(t)
-    t = 1:length(Hy);
-end
-%%
+[Mode,ceval,deval,magmode,Xdmd] = DMD (y0(:,1:end-1),y0(:,2:end),4,dt);        %4 nodes
 
