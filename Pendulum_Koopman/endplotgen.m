@@ -1,6 +1,6 @@
 clear all, close all, clc
-path2data = '../Data/';
-ModelName1='Pendulum_Uncontrol_m1_M5_0_0_p75pi_0_v3_';
+path2data = '../Data';
+ModelName1='Inv_Pend_m1_M5_m3_0_p75pi_0_v1_';
 load([path2data,'/',ModelName1,'/',[ModelName1,'Data.mat']])
 path2figs = ['../Data/',ModelName1,'/Figures/PENDULUM/']; mkdir(path2figs)
 
