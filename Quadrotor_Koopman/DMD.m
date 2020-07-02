@@ -1,4 +1,4 @@
-function [Phi ,omega ,lambda ,b,Xdmd] = DMD(X1,X2,r,dt)
+function [Phi ,omega ,lambda ,b,Xdmd] = DMD(StateData,r,dt)
 % function [Phi,omega ,lambda ,b,Xdmd ] = DMD(X1,X2,r,dt)
 % Computes the Dynamic Mode Decomposition of X1, X2
 %
@@ -15,6 +15,9 @@ function [Phi ,omega ,lambda ,b,Xdmd] = DMD(X1,X2,r,dt)
 % lambda, the discrete-time DMD eigenvalues
 % b, a vector of magnitudes of modes Phi
 % Xdmd, the data matrix reconstructed by Phi, omega , b
+%% Collect and construct the snapshot 
+X1 = StateData (:,1:end -1);
+X2 = StateData (:,2:end);
 %% DMD
 [U, S, V] = svd(X1, 'econ');
 r = min(r, size(U,2));

@@ -5,11 +5,13 @@ f = @(x,u)SimpPend(x,u);
 %Input (simple) Control Matrix
 B = [0;1];
 %Initial Conditions
-thetai = 0.5;
+thetai = 1.5;
 thetadi = 0.5;
 x0 = [thetai;thetadi];
 %Terminal Conditions
-xf = [pi;0];
+thetaf = pi;
+thetadf = 0;
+xf = [thetaf;thetadf];
 %Predicted time, still needs to be fixed for DMDc
 predict = 5; 
 %Time Parameters
@@ -69,10 +71,10 @@ y1k = real(Xdmd2);
 % Prep for error plot
 for i = 1:length(y0k)
     y0check(i,:) = abs(y0((i+1),:)-y0k(:,i)');
-    y1check(i,:) = abs(y1((i+1),:)-y1k(:,i)');
+    y1check(i,:) = abs(y1((i+1),:)-Xp(:,i)');
 end
 datit = sprintf('Simple pendulum DMD check for %d seconds',duration);
-figure('NumberTitle', 'off', 'Name', datit);
+figure('NumberTitle', 'off','visible','off', 'Name', datit);
 %title('Inverted pendulum DMD check for %d seconds',duration)
 subplot(2,1,1)
 plot(y0check(:,1))
@@ -82,7 +84,7 @@ hold on
 plot(y0(:,1))
 hold off
 title('Uncontrol Error - Theta')
-legend ('Error','DMD','Normal')
+legend ('Error','DMD','Normal','Xprime')
 ylabel('\theta');
 xlabel('t(ms)');
 
@@ -105,10 +107,12 @@ subplot(2,1,1)
 plot(y1check(:,1))
 % plot(y1(:,1))
 hold on 
-plot(y1k(1,2:length(y1k))','x')
+plot(Xp(1,:))
 % plot(y1(:,1))
 hold on
 plot(y1(:,1))
+% hold on
+% plot(Xp(1,:),'*')
 hold off
 title('Control Error - Theta')
 legend ('Error','DMD','Normal')
@@ -118,11 +122,14 @@ xlabel('t(ms)');
 subplot(2,1,2)
 plot(y1check(:,2))
 hold on 
-plot(y1k(2,2:length(y1k)'),'x')
+% plot(y1k(2,2:length(y1k)'),'x')
+plot(Xp(2,:))
 hold on
 plot(y1(:,2))
+% hold on
+% plot(Xp(2,:),'*')
 hold off
-title('Uncontrol Error - Theta_{dot}')
+title('Control Error - Theta_{dot}')
 legend ('Error','DMD','Normal')
 ylabel('\theta''');
 xlabel('t(ms)');
@@ -137,10 +144,11 @@ xlabel('t(ms)');
  DataStore.Btilda = Btild;
  DataStore.XDMD = Xdmd;
  DataStore.XDMDC = Xdmd2;
+ DataStore.Xp = Xp;
 % 
 save([path2data,[ModelName1,'Data.mat']])
 % Save Snapshots
  for i = 1:2
     hmp = sprintf('DMD_Pendulum_Error%d.png',i);
-    saveas(figure(1),[path2figs, hmp])
+    saveas(figure(i),[path2figs, hmp])
  end

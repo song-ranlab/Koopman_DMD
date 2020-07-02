@@ -1,4 +1,4 @@
-function [Phi ,omega ,lambda ,b,Xdmd,approxA,approxB,Xprime] = DMDcii(StateData, InputData, r, p, dt)
+function [Phi ,omega ,lambda ,b,Xdmd,approxA,approxB,Xprime,Xprime2] = DMDcii(StateData, InputData, r, p, dt)
 %DMDC
 %% Collect and construct the snapshot 
 X = StateData (:,1:end -1);
@@ -35,15 +35,16 @@ q = size(Ups ,1);
 U_1 = Util (1:n,:);
 U_2 = Util (n+q:n+q,:);
 approxA = Uhat'*(Xp)*Vtil*inv(Sigtil)*U_1'*Uhat;
-approxB = Uhat'*(Xp)*Vtil*inv(Sigtil)*U_2';
 
+approxB = Uhat'*(Xp)*Vtil*inv(Sigtil)*U_2';
+% approxA = (Xp - approxB*Ups)*V*inv(Sig)*U';
 %% Preform the eigenval decomp of Atilda
 [W,D] = eig(approxA);
 
-%%Compte the dynamic modes of the operator A
+%Compte the dynamic modes of the operator A
 Phi = Xp * Vtil * inv(Sigtil) * U_1'*Uhat * W;
 
-%%Finish to output
+%Finish to output
 lambda = diag(D); % discrete-time eigenvalues
 omega = log(lambda)/dt; % continuous-time eigenvalues
 %% Compute DMD mode amplitudes b
@@ -58,6 +59,15 @@ for iter = 1:mm1 ,
 end;
 Xdmd = Phi * time_dynamics ;
 
- Xprime = approxA*StateData +  approxB*InputData;
+%% Exporting Xprime X' = AX+BU
+Xprime = approxA*Xp +  approxB*Ups;
+Xprime2 = nan(r,mm1);
+Xprime2(:,1) = approxA*StateData(:,1) ;
+ for i = 2: length(time_dynamics)
+     Xprime2(:,i) = approxA*Xprime2(:,i-1) + approxB*Ups(:,i-1);
+ end
+ 
+%  A_DMDc = (Xp - B*Ups)*V*inv(Sig)*U';
+      
 end
 
