@@ -1,4 +1,4 @@
-function [Phi ,omega ,lambda ,b,Xdmd,approxA,approxB,Xprime,Xprime2] = DMDcii(StateData, InputData, r, p, dt)
+function [Phi ,omega ,lambda ,b,Xdmd,approxA,approxB,Xprime2] = DMDcii(StateData, InputData, r, p, dt)
 %DMDC
 %% Collect and construct the snapshot 
 X = StateData (:,1:end -1);

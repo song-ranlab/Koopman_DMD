@@ -1,4 +1,4 @@
-7clear all, close all, clc
+clear all, close all, clc
 path2data = '../Data/';
 ModelName1='Pendulum_Uncontrol_m1_M5_0_0_p75pi_0_v2_';
 load([path2data,'/',ModelName1,'/',[ModelName1,'Data.mat']])
