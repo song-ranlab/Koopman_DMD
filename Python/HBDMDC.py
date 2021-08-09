@@ -56,15 +56,31 @@ def myDMDcUB(X, U,r,q,dt):
     [W, D] = np.linalg.eig(Atilde)
 
     #Phi = Xp * Vtil * inv(Sigtil) * U_1.T *Uhat * W;
+    #Compute the dynamic modes of operator Atilde
+
     Phi = np.linalg.multi_dot([X2,Vp, Sp, Up1.T.conj(), W])
     t = np.array(0, m-1)
-    tspan =
+    tspan = np.linspace(0.,dt*(m-1),dt)
+
+    lambdaval = np.diag(D)
+    omega = np.log(lambdaval)/dt
+
+    # COmpute the DMD mode amplitude b
+
+    x1 = X[:,0]
+    b = Phi/x1
+    mm1 = m-1
+    time_dynamics = np.zeros(r, mm1)
+    for i in range(0,mm1-1):
+        time_dynamics[:,iter]= (b*np.exp(omega*tspan(iter)))
+
+    Xdmd = Phi * time_dynamics
 
 
     return[Atilde, Btilde, Phi, Xdmd]
 
 
-def myDMDcKB(X,U,,B,r,dt):
+def myDMDcKB(X,U,B,r,dt):
 
     n = int(len(X[1]))  # rank of augmented control data
     m = int(len(X[0]))
@@ -79,7 +95,24 @@ def myDMDcKB(X,U,,B,r,dt):
     sig = np.diag(np.reciprocal(Sig[:r]))  # Figure out later why python stupid
     V = V[0:r, :].T
     holder = X2 - B * U
-    A_DMDc = np.linalg.multi_dot([holder, V, sig, U.T.conj()])
-    print(A_DMDc)
+    Atilde = np.linalg.multi_dot([holder, V, sig, U.T.conj()])
+    print(Atilde)
+    [W, D] = np.linalg.eig(Atilde)
 
+    # Compute the dynamic modes of operator Atilde
+    Phi = np.linalg.multi_dot([X2, Vp, Sp, Up1.T.conj(), W])
+    t = np.array(0, m - 1)
+    tspan = np.linspace(0., dt * (m - 1), dt)
+    lambdaval = np.diag(D)
+    omega = np.log(lambdaval) / dt
+
+    # Compute the DMD mode amplitude b
+    x1 = X[:, 0]
+    b = Phi / x1
+    mm1 = m - 1
+    time_dynamics = np.zeros(r, mm1)
+    for i in range(0, mm1 - 1):
+        time_dynamics[:, iter] = (b * np.exp(omega * tspan(iter)))
+
+    Xdmd = Phi * time_dynamics
     return [Atilde, Xdmd]
