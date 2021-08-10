@@ -91,7 +91,7 @@ def myDMDcKB(X,U,B,r,dt):
 
     U, Sig, V = sci.linalg.svd(X2, lapack_driver='gesvd')
 
-    U = U[0:r, :].T
+    U = U[0:r, :]
     sig = np.diag(np.reciprocal(Sig[:r]))  # Figure out later why python stupid
     V = V[0:r, :].T
     holder = X2 - B * U
@@ -100,7 +100,7 @@ def myDMDcKB(X,U,B,r,dt):
     [W, D] = np.linalg.eig(Atilde)
 
     # Compute the dynamic modes of operator Atilde
-    Phi = np.linalg.multi_dot([X2, Vp, Sp, Up1.T.conj(), W])
+    Phi = np.linalg.multi_dot([X2, V, sig, U.T.conj(), W])
     t = np.array(0, m - 1)
     tspan = np.linspace(0., dt * (m - 1), dt)
     lambdaval = np.diag(D)
