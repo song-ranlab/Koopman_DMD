@@ -18,25 +18,25 @@ def buildlinsys (A, B, X0, U, t_span):
     return[Y]
 
 
+#Plots comparisons between two sets of data assuming each row corresponds to the same state
+#wrapping to Pi (or 2 Pi) shoul be done prior to this function
 
-def comparestates (X1, X2, title1, title2):
-    n = len(X1[1])
-    m = len(X1[0])
+def comparestates (X1, X2, t_span, title_main, title1, title2):
+    n = len(X1[0])
+    m = len(X1[1])
     plt.figure(figsize=(12, 5), dpi=600)
     # plt.title("EDMD Reconstructed Controlled Pendulum Angular position and rate using DMDc homebrew")
-    plt.subplot(121)
-    plt.plot(t_span[0:testl], X[0, 0:testl], 'g-', label=r' Original $\theta$ - [Rad]')
-    plt.plot(t_span[0:testl], Xnew[0, 0:testl], 'b--', label=r' Reconstruct $\theta$ - [Rad]')
-    plt.xlabel(r"$t$, [s]")
-    plt.ylabel(r"State")
-    plt.legend(loc='best')
-    plt.subplot(122)
-    plt.plot(t_span[0:testl], X[1, 0:testl], 'm-', label=r' Original $\dot{\theta}$ - [Rad/s]')
-    plt.plot(t_span[0:testl], Xnew[1, 0:testl], 'k--', label=r' Reconstruct$\dot{\theta}$ - [Rad/s]')
-    plt.xlabel(r"$t$, [s]")
-    plt.ylabel(r"State")
-    plt.legend(loc='best')
-    plt.show()
+
+    for i in range(0,n-1):
+        plt.subplot(n, 1, i)
+        plt.title(title_main + " State " + str(i))
+        label1 = title1 + " State " + str(i)
+        label2 = title2 + " State " + str(i)
+        plt.plot(t_span[0:m], X1[i, 0:m], 'g-', label=label1)
+        plt.plot(t_span[0:m], X2[0, 0:m], 'b--', label=label2)
+        plt.xlabel(r"$t$, [s]")
+        plt.ylabel(" State " + str(i))
+        plt.legend(loc='best')
 
 
 

@@ -4,7 +4,7 @@ import scipy
 import scipy.linalg as linalg
 #import control
 #from control.matlab import *
-dt = 0.01 # timestep size
+dt = 0.001 # timestep size
 l = 2.0 # arm length
 m = 1.0 # pendulum mass
 g = 9.81 # gravity acceleration

@@ -12,7 +12,7 @@ def myDMDcUB(X, U,r,q,dt):
     thresh = 1e-10
     n = int(len(X[1]))  # rank of augmented control data
     m = int(len(X[0]))
-    Omega = np.zeros((n + q, m - 1))
+    #Omega = np.zeros((n + q, m - 1))
 
     #Set up Snapshots
     X1 = X[:, :-1]
@@ -55,7 +55,6 @@ def myDMDcUB(X, U,r,q,dt):
 
     [W, D] = np.linalg.eig(Atilde)
 
-    #Phi = Xp * Vtil * inv(Sigtil) * U_1.T *Uhat * W;
     #Compute the dynamic modes of operator Atilde
 
     Phi = np.linalg.multi_dot([X2,Vp, Sp, Up1.T.conj(), W])
