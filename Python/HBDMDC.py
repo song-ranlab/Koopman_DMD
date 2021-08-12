@@ -4,18 +4,26 @@ import numpy as np
 import scipy as sci
 
 
-def myDMD(X,r,dt):
-    thresh = 1e-10
-    n = int(len(X[1]))  # rank of augmented control data
-    m = int(len(X[0]))
+def mydmd(X, r, dt):
+    # n = int(len(X[1]))  # rank of augmented control data
+    # m = len(X[0])
+    m = np.size(X, 1)
     X1 = X[:, :-1]
     X2 = X[:, 1:]
-    U, Sig, V = sci.linalg.svd(X2, lapack_driver='gesvd')
+    U, Sig, V = sci.linalg.svd(X1, lapack_driver='gesvd')
 
+    sig = np.diag(Sig)
+    V = V.T
     U = U[0:r, :]
-    sig = np.diag(np.reciprocal(Sig[:r]))  # Figure out later why python stupid
-    V = V[0:r, :].T
-    Atilde = np.linalg.multi_dot([U.T.conj(),X2, V,sig ])
+    V = V[0:r,:]
+
+    # U = np.array([[-1, 1]]) * U  # I am totally going to cheat my ass off here with a few commands - lets look back at this today
+    # #print(U)
+    # sig = np.diag(np.reciprocal(Sig[:r]))  # Figure out later why python stupid
+    # #V = V[0:r, :].T
+    # V = np.array([[-1, 1]]) * V # I am totally going to cheat my ass off here with a few commands
+    #print(V)
+    Atilde = np.linalg.multi_dot([U.T.conj(), X2, V, sig])
     print(Atilde)
     [W, D] = np.linalg.eig(Atilde)
     # Compute the dynamic modes of operator Atilde
@@ -27,16 +35,19 @@ def myDMD(X,r,dt):
 
         lambdaval = np.diag(D)
         omega = np.log(lambdaval) / dt
-        omega.resize((r, 1), refcheck=False)
+        hold = len(omega)
+        omega.resize((hold, 1), refcheck=False)
         x1 = X[:, 0]
-        b = Phi / x1
-        b.resize((r, 1), refcheck=False)
+        b = np.linalg.lstsq(Phi,x1)
+        print(b)
+        hold = len(b)
+        b.resize((hold, 1), refcheck=False)
         mm1 = m - 1
         time_dynamics = np.zeros((r, mm1))
         for i in range(0, mm1 - 1):
             check = b * (np.exp(omega * tspan[i]))
             time_dynamics[:, i] = check
-
+            print(check)
         Xdmd = Phi * time_dynamics
     except:
         Xdmd = 0.
@@ -51,8 +62,8 @@ def myDMDcUB(X, U,r,q,dt):
     # r is the desired rank or parameters of the state reconstruction
     # q is the desired rank or parameters of the control reconstruction
     thresh = 1e-10
-    n = int(len(X[1]))  # rank of augmented control data
-    m = int(len(X[0]))
+    n = np.size(X, 0)  # rank of augmented control data
+    m = np.size(X, 1)
     X1 = X[:, :-1]
     X2 = X[:, 1:]
     Omega = np.concatenate((X1, U), axis=0)
@@ -100,7 +111,7 @@ def myDMDcUB(X, U,r,q,dt):
         omega = np.log(lambdaval) / dt
         omega.resize((r, 1), refcheck=False)
         x1 = X[:, 0]
-        b = Phi / x1
+        b = np.linalg.lstsq(Phi,x1)
         b.resize((r, 1), refcheck=False)
         mm1 = m - 1
         time_dynamics = np.zeros((r, mm1))
@@ -144,7 +155,7 @@ def myDMDcKB(X,U,B,r,dt):
         omega = np.log(lambdaval) / dt
         omega.resize((r, 1), refcheck=False)
         x1 = X[:, 0]
-        b = Phi / x1
+        b = np.linalg.lstsq(Phi,x1)
         b.resize((r, 1), refcheck=False)
         mm1 = m - 1
         time_dynamics = np.zeros((r, mm1))

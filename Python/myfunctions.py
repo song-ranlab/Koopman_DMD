@@ -22,7 +22,7 @@ def buildlinsys (A, B, X0, U, t_span):
 
 def comparestates (X1, X2, t_span, title_main, title1, title2, figsize, dpi ):
     n = len(X1)
-    m = len(X1[1])
+    m = len(X2[1])
     # figsize = (22, 25)
     # dpi = 600
 
