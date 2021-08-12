@@ -1,6 +1,6 @@
 import numpy as np
 import scipy as sci
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 # This function builds a linear system Y = Ax + Bu for whatever timespan T_span
 
@@ -8,12 +8,11 @@ def buildlinsys (A, B, X0, U, t_span):
 
     n = len(A[1])
     m = len(t_span)
-
     Y = np.zeros((n,m-1))
     Y[:, 0] = X0
-    for i in range(0, m - 1):
+    for i in range(0, m - 2):
 
-        Y[:, i + 1] = A @ Y[:, i] + B@ U[:, i]
+        Y[:, i + 1] = A @ Y[:, i] + B @ U[:, i]
 
     return[Y]
 
@@ -21,24 +20,36 @@ def buildlinsys (A, B, X0, U, t_span):
 #Plots comparisons between two sets of data assuming each row corresponds to the same state
 #wrapping to Pi (or 2 Pi) shoul be done prior to this function
 
-def comparestates (X1, X2, t_span, title_main, title1, title2):
-    n = len(X1[0])
+def comparestates (X1, X2, t_span, title_main, title1, title2, figsize, dpi ):
+    n = len(X1)
     m = len(X1[1])
-    plt.figure(figsize=(12, 5), dpi=600)
-    # plt.title("EDMD Reconstructed Controlled Pendulum Angular position and rate using DMDc homebrew")
+    # figsize = (22, 25)
+    # dpi = 600
 
-    for i in range(0,n-1):
+    plt.figure(figsize=figsize, dpi=dpi)
+
+    for i in range(1, n + 1):
         plt.subplot(n, 1, i)
         plt.title(title_main + " State " + str(i))
         label1 = title1 + " State " + str(i)
         label2 = title2 + " State " + str(i)
-        plt.plot(t_span[0:m], X1[i, 0:m], 'g-', label=label1)
-        plt.plot(t_span[0:m], X2[0, 0:m], 'b--', label=label2)
-        plt.xlabel(r"$t$, [s]")
+        plt.plot(t_span[0:m], X1[i - 1, 0:m], 'r-', label=label1)
+        plt.plot(t_span[0:m], X2[i - 1, 0:m], 'b--', label=label2)
+        plt.xlabel(r"$t$ [s]")
         plt.ylabel(" State " + str(i))
         plt.legend(loc='best')
 
-
+def showstate (x, t_span, title, figsize, dpi):
+    n = len(x)
+    m = len(x[1])
+    plt.figure(figsize=figsize, dpi=dpi)
+    for i in range(1, n + 1):
+        plt.subplot(n, 1, i)
+        plt.title(title + " State " + str(i))
+        plt.plot(t_span[0:m], x[i - 1, 0:m], 'r-', label=r'State'+str(i))
+        plt.xlabel(r"$t$ [s]")
+        plt.ylabel(" State " + str(i))
+        plt.legend(loc='best')
 
 
 #Takes in a matrix where the X axis is the time step and an Y Axis is the individual states

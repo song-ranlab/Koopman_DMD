@@ -9,7 +9,7 @@ l = 2.0 # arm length
 m = 1.0 # pendulum mass
 g = 9.81 # gravity acceleration
 b = 0 #Damping Factor
-duration = 20.0 # duration of simulation in seconds
+duration = 30.0 # duration of simulation in seconds
 thresh = 0.0 # DMD Threshold: 0 for no truncation, <0 sets the eigen value minimum threshold, >0 sets the rank as long as thresh is lower than max rank
 x1_init = np.pi/4.0
 x2_init = np.pi/4.0
@@ -40,9 +40,9 @@ sine = 1
 # linear system
 A = np.matrix([[0.,1.],
                [-l/g,0.]])
-B = np.matrix([[0.],
-               [1./(m*l**2)]])
-
+#B = np.matrix([[0.],
+#               [1./(m*l**2)]])
+B = np.array([[0],[1/(m*l**2)]])
 
 def dLQR(A,B,Q,R):
     #Solve the continuous time lqr controller.
