@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 def buildlinsys (A, B, X0, U, t_span):
 
-    n = len(A[1])
-    m = len(t_span)
+    n = np.size(A,1)
+    m = np.size(t_span,0)
     Y = np.zeros((n,m-1))
     Y[:, 0] = X0
     for i in range(0, m - 2):

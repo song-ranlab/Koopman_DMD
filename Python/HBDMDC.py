@@ -5,50 +5,47 @@ import scipy as sci
 
 
 def mydmd(X, r, dt):
-    # n = int(len(X[1]))  # rank of augmented control data
-    # m = len(X[0])
+    # n = np.size(X,0)
     m = np.size(X, 1)
     X1 = X[:, :-1]
     X2 = X[:, 1:]
-    U, Sig, V = sci.linalg.svd(X1, lapack_driver='gesvd')
-
-    sig = np.diag(Sig)
-    V = V.T
-    U = U[0:r, :]
-    V = V[0:r,:]
-
-    # U = np.array([[-1, 1]]) * U  # I am totally going to cheat my ass off here with a few commands - lets look back at this today
-    # #print(U)
-    # sig = np.diag(np.reciprocal(Sig[:r]))  # Figure out later why python stupid
-    # #V = V[0:r, :].T
-    # V = np.array([[-1, 1]]) * V # I am totally going to cheat my ass off here with a few commands
-    #print(V)
-    Atilde = np.linalg.multi_dot([U.T.conj(), X2, V, sig])
-    print(Atilde)
+    U, Sig, v = sci.linalg.svd(X1, lapack_driver='gesvd')
+    # U, Sig, v = np.linalg.svd(X1)
+    # sig = np.diag(Sig)
+    V = v.T
+    U = U[:r, :]
+    U = np.array([[-1, 1]]) * U
+    V_r = V[:, :r]
+    V_r = np.array([[-1, 1]]) * V_r
+    Atilde = np.linalg.multi_dot([U.T.conj(), X2, V_r, np.diag(np.reciprocal(Sig))])
     [W, D] = np.linalg.eig(Atilde)
-    # Compute the dynamic modes of operator Atilde
-    Phi = np.linalg.multi_dot([X2, V, sig, U.T.conj(), W])
-    #Python sometimes gets really large eigen values and cannot continue so try-catch to just brute force it
+    # D = np.diag(D)    # Compute the dynamic modes of operator Atilde - for testing purposes
+    Phi = np.linalg.multi_dot([X2, V_r, np.diag(np.reciprocal(Sig)), D])
     try:
         t = np.array((0, m - 1))
         tspan = np.linspace(0., dt * (m - 1), m - 1)
 
-        lambdaval = np.diag(D)
-        omega = np.log(lambdaval) / dt
+        # lambdaval = np.diag(W)
+        omega = np.log(W) / dt
         hold = len(omega)
         omega.resize((hold, 1), refcheck=False)
         x1 = X[:, 0]
-        b = np.linalg.lstsq(Phi,x1)
-        print(b)
+        # b = np.linalg.lstsq(Phi,x1)
+        b = np.linalg.solve(Phi, x1)
         hold = len(b)
         b.resize((hold, 1), refcheck=False)
+
         mm1 = m - 1
-        time_dynamics = np.zeros((r, mm1))
+        time_dynamics = np.zeros((r, mm1), dtype=complex)
         for i in range(0, mm1 - 1):
             check = b * (np.exp(omega * tspan[i]))
-            time_dynamics[:, i] = check
-            print(check)
-        Xdmd = Phi * time_dynamics
+            # time_dynamics[:,i]=b*(np.exp(omega * tspan[i]))
+            for k in range(0, r):
+                time_dynamics[k, i] = check[k, 0]
+                # print('this is time dynamics : {}'.format(time_dynamics[k, i]))
+                # print('this is check : {}'.format(check[k,0]))
+
+        Xdmd = Phi @ time_dynamics
     except:
         Xdmd = 0.
         print('Something happened calculating Xdmd')
@@ -62,7 +59,7 @@ def myDMDcUB(X, U,r,q,dt):
     # r is the desired rank or parameters of the state reconstruction
     # q is the desired rank or parameters of the control reconstruction
     thresh = 1e-10
-    n = np.size(X, 0)  # rank of augmented control data
+    n = np.size(X,0)
     m = np.size(X, 1)
     X1 = X[:, :-1]
     X2 = X[:, 1:]
@@ -101,27 +98,37 @@ def myDMDcUB(X, U,r,q,dt):
 
     # Compute the dynamic modes of operator Atilde
 
-    Phi = np.linalg.multi_dot([X2, Vp, Sp, Up1.T.conj(), W])
-
+    Phi = np.linalg.multi_dot([X2, Vp, Sp, Up1.T.conj(),Ur.T.conj(), D])
+    [W, D] = np.linalg.eig(Atilde)
+    # D = np.diag(D)    # Compute the dynamic modes of operator Atilde
     try:
         t = np.array((0, m - 1))
         tspan = np.linspace(0., dt * (m - 1), m - 1)
 
-        lambdaval = np.diag(D)
-        omega = np.log(lambdaval) / dt
-        omega.resize((r, 1), refcheck=False)
+        # lambdaval = np.diag(W)
+        omega = np.log(W) / dt
+        hold = len(omega)
+        omega.resize((hold, 1), refcheck=False)
         x1 = X[:, 0]
-        b = np.linalg.lstsq(Phi,x1)
-        b.resize((r, 1), refcheck=False)
+        # b = np.linalg.lstsq(Phi,x1)
+        b = np.linalg.solve(Phi, x1)
+        hold = len(b)
+        b.resize((hold, 1), refcheck=False)
+
         mm1 = m - 1
-        time_dynamics = np.zeros((r, mm1))
+        time_dynamics = np.zeros((r, mm1), dtype=complex)
         for i in range(0, mm1 - 1):
             check = b * (np.exp(omega * tspan[i]))
-            time_dynamics[:, i] = check
+            # time_dynamics[:,i]=b*(np.exp(omega * tspan[i]))
+            for k in range(0, r):
+                time_dynamics[k, i] = check[k, 0]
+                # print('this is time dynamics : {}'.format(time_dynamics[k, i]))
+                # print('this is check : {}'.format(check[k,0]))
 
-        Xdmd = Phi * time_dynamics
+        Xdmd = Phi @ time_dynamics
     except:
         Xdmd = 0.
+        print('Something happened calculating Xdmd')
 
     return[Atilde, Btilde, Phi, Xdmd]
 
@@ -146,24 +153,35 @@ def myDMDcKB(X,U,B,r,dt):
     [W, D] = np.linalg.eig(Atilde)
 
     # Compute the dynamic modes of operator Atilde
-    Phi = np.linalg.multi_dot([X2, V, sig, U.T.conj(), W])
+    Phi = np.linalg.multi_dot([X2, V, sig, U.T.conj(), D])
+    # Python sometimes gets really large eigen values and cannot continue so try-catch to just brute force it
     try:
         t = np.array((0, m - 1))
         tspan = np.linspace(0., dt * (m - 1), m - 1)
 
-        lambdaval = np.diag(D)
-        omega = np.log(lambdaval) / dt
-        omega.resize((r, 1), refcheck=False)
+        # lambdaval = np.diag(W)
+        omega = np.log(W) / dt
+        hold = len(omega)
+        omega.resize((hold, 1), refcheck=False)
         x1 = X[:, 0]
-        b = np.linalg.lstsq(Phi,x1)
-        b.resize((r, 1), refcheck=False)
+        # b = np.linalg.lstsq(Phi,x1)
+        b = np.linalg.solve(Phi, x1)
+        hold = len(b)
+        b.resize((hold, 1), refcheck=False)
+
         mm1 = m - 1
-        time_dynamics = np.zeros((r, mm1))
+        time_dynamics = np.zeros((r, mm1), dtype=complex)
         for i in range(0, mm1 - 1):
             check = b * (np.exp(omega * tspan[i]))
-            time_dynamics[:, i] = check
+            # time_dynamics[:,i]=b*(np.exp(omega * tspan[i]))
+            for k in range(0, r):
+                time_dynamics[k, i] = check[k, 0]
+                # print('this is time dynamics : {}'.format(time_dynamics[k, i]))
+                # print('this is check : {}'.format(check[k,0]))
 
-        Xdmd = Phi * time_dynamics
+        Xdmd = Phi @ time_dynamics
     except:
         Xdmd = 0.
+        print('Something happened calculating Xdmd')
+
     return [Atilde, Xdmd]
