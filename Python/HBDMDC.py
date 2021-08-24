@@ -14,9 +14,9 @@ def mydmd(X, r, dt):
     # sig = np.diag(Sig)
     V = v.T
     U = U[:r, :]
-    U = np.array([[-1, 1]]) * U
+#    U = np.array([[-1, 1]]) * U
     V_r = V[:, :r]
-    V_r = np.array([[-1, 1]]) * V_r
+#    V_r = np.array([[-1, 1]]) * V_r
     Atilde = np.linalg.multi_dot([U.T.conj(), X2, V_r, np.diag(np.reciprocal(Sig))])
     [W, D] = np.linalg.eig(Atilde)
     # D = np.diag(D)    # Compute the dynamic modes of operator Atilde - for testing purposes

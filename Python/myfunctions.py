@@ -21,8 +21,8 @@ def buildlinsys (A, B, X0, U, t_span):
 #wrapping to Pi (or 2 Pi) shoul be done prior to this function
 
 def comparestates (X1, X2, t_span, title_main, title1, title2, figsize, dpi ):
-    n = len(X1)
-    m = len(X2[1])
+    n = np.size(X1,0)
+    m = np.size(X2,1)
     # figsize = (22, 25)
     # dpi = 600
 
@@ -40,8 +40,8 @@ def comparestates (X1, X2, t_span, title_main, title1, title2, figsize, dpi ):
         plt.legend(loc='best')
 
 def showstate (x, t_span, title, figsize, dpi):
-    n = len(x)
-    m = len(x[1])
+    n = np.size(x,0)
+    m = np.size(x,1)
     plt.figure(figsize=figsize, dpi=dpi)
     for i in range(1, n + 1):
         plt.subplot(n, 1, i)
